@@ -1,0 +1,19 @@
+<Rule description>
+
+The "Liar Game" is a simple deduction game played by 3 to 8 players for 5 to 10 minutes.
+
+<Regular Players> know the given word. They have to deduce who the liar is, while keeping the given word hidden.
+
+Only one player, <The Liar>, doesn't know the given word. They have to deduce the given word, while hiding their identity.
+
+1. Enter the number of players participating in the game, then press the <Start Game!> button.
+
+2. When the player list appears, each player secretly checks their own answer without others seeing by passing the device.
+
+3. Once everyone has checked their answers, start the game. Starting from <Player 1>, players take turns giving hints about the given word. (These hints should be detailed enough to prove they are not the liar but ambiguous enough that the liar cannot guess the given word.)
+
+4. After giving 3 hints each person, the game ends. All players then vote for who they think the liar is.
+
+5. If the person who receives the most votes is not the liar, the liar wins.
+
+6. If the person who receives the most votes is the liar, the liar looks at the Word bank and guesses what the given word is. If correct, the liar wins; if wrong, the regular players win.

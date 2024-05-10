@@ -1,0 +1,20 @@
+Airplane
+Bank
+Beach
+Casino
+Circus Tent
+Embassy
+Hospital
+Hotel
+Military Base
+Nightclub
+Passenger Train
+Pirate Ship
+Police Station
+Restaurant
+School
+Space Station
+Submarine
+Supermarket
+Theater
+Zoo
