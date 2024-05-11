@@ -41,8 +41,12 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
         with open("rule_description.txt", "r") as file:
             rule = file.read()
             rule_window = self.create_sub_window()
+            '''
+            Need to be fixed: rule_window doesn't fit into the screen when this program is executed on Android.
+            '''
             rule_text = self.create_widget(rule_window, tk.Text, wrap="word")
             rule_text.insert(tk.END, rule)
+            rule_text.config(state="disabled")
             # Can't use the "back_btn_usage" argument of the "create_sub_window" method because the btn goes to the top of the window
             rw_back_btn = self.create_widget(rule_window, tk.Button, text="Back", command=rule_window.destroy)
 
@@ -54,8 +58,8 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
         self.cur_page = page
 
     # Common method for create various kinds of widgets
-    def create_widget(self, parent, widget_type, text=None, command=None, pack=True, side=None, anchor=None, wrap=None):
-        widget = widget_type(parent, text=text, command=command, wrap=wrap)
+    def create_widget(self, parent, widget_type, text=None, command=None, pack=True, side=None, anchor=None, wrap=None, state=None):
+        widget = widget_type(parent, text=text, command=command, wrap=wrap, state=state)
         if pack:
             widget.pack(side=side, anchor=anchor)
         return widget
