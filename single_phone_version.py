@@ -2,7 +2,7 @@ import tkinter as tk
 from random import randint, choice
 
 
-class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
+class LiarGame(tk.Tk):  # Inherit the class Tk into the class LiarGame.
     def __init__(self, title):
         # not fully understood what super() does.
         # Just guessing that it calls "__init__" method of Tk since it doesn't get executed when Tk gets inherited.
@@ -41,14 +41,26 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
         with open("rule_description.txt", "r") as file:
             rule = file.read()
             rule_window = self.create_sub_window()
-            '''
-            Need to be fixed: rule_window doesn't fit into the screen when this program is executed on Android.
-            '''
             rule_text = self.create_widget(rule_window, tk.Text, wrap="word")
             rule_text.insert(tk.END, rule)
             rule_text.config(state="disabled")
             # Can't use the "back_btn_usage" argument of the "create_sub_window" method because the btn goes to the top of the window
             rw_back_btn = self.create_widget(rule_window, tk.Button, text="Back", command=rule_window.destroy)
+
+            # Just add it because the sub window doesn't automatically fit into the screen in Android.
+            self.fit_window(rule_window)
+
+    # Common method for resizing a window when it's larger than the screen (Doesn't exclude the taskbar. Need to be fixed.)
+    def fit_window(self, window, padding=30):
+        self.update()
+        screen_width = self.winfo_screenwidth() - padding
+        screen_height = self.winfo_screenheight() - padding
+        window_width = window.winfo_width()
+        window_height = window.winfo_height()
+        if screen_width < window_width:
+            window.geometry(f"{screen_width}x{window_height}")
+        if screen_height < window_height:
+            window.geometry(f"{window_width}x{screen_height}")
 
     # Common method for switching between pages.
     def show_page(self, page):
@@ -58,8 +70,8 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
         self.cur_page = page
 
     # Common method for create various kinds of widgets
-    def create_widget(self, parent, widget_type, text=None, command=None, pack=True, side=None, anchor=None, wrap=None, state=None):
-        widget = widget_type(parent, text=text, command=command, wrap=wrap, state=state)
+    def create_widget(self, parent, widget_type, text=None, command=None, wrap=None, pack=True, side=None, anchor=None):
+        widget = widget_type(parent, text=text, command=command, wrap=wrap)
         if pack:
             widget.pack(side=side, anchor=anchor)
         return widget
@@ -74,13 +86,18 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
     # Common method for create a sub window
     def create_sub_window(self, label_text=None, yes_btn_command=None, back_btn_usage=False):
         sub_window = tk.Toplevel(self)
-        label = self.create_widget(sub_window, tk.Label, text=label_text)
+        if label_text:
+            label = self.create_widget(sub_window, tk.Label, text=label_text)
         if back_btn_usage:
             back_button = self.create_widget(sub_window, tk.Button, text="Back", command=sub_window.destroy)
         if yes_btn_command:
             yes_button = self.create_widget(sub_window, tk.Button,text="Yes", command=yes_btn_command)
-
         return sub_window
+
+    # Common method for delete all the widgets in a widget
+    def del_widgets(self, page):
+        for widget in page.winfo_children():
+            widget.destroy()
 
     # Load word bank from a txt file.
     def load_word_bank(self, file_path):
@@ -117,7 +134,7 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
             self.player_listbox = self.create_listbox(self.pages["main"], player_list)
             show_answer_btn = self.create_widget(self.pages["main"], tk.Button, text="Show selected player's answer",
                                                  command=self.selection_check)
-            show_word_bank_btn = self.create_widget(self.pages["main"], tk.Button, text="Show word bank",
+            self.create_widget(self.pages["main"], tk.Button, text="Show word bank",
                                                     command=lambda: self.show_page(self.pages["list"]))
             new_game_btn = self.create_widget(self.pages["main"], tk.Button, text="New game", command=self.new_game,
                                               side="bottom", anchor="s")
@@ -135,7 +152,6 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
             self.selected_index = self.player_listbox.curselection()[0]
             check_window = self.create_sub_window(
                 f"Are you sure you are {self.player_listbox.get(self.selected_index)}?", yes_btn_command=lambda: (check_window.destroy(), self.show_answer()), back_btn_usage=True)
-
         else:
             return  # Nothing happens when there is no selection.
 
@@ -149,33 +165,23 @@ class LiarGame(tk.Tk):  # inherit the class Tk into the class LiarGame.
             prompt = f"The word is <{self.answer}>"
 
         # Create the sub window
-        answer_window = self.create_sub_window(prompt)
+        answer_window = self.create_sub_window(prompt, back_btn_usage=True)
         aw_back_btn = self.create_widget(answer_window, tk.Button, command=answer_window.destroy)
 
         # Close the sub window automatically
-        remaining_sec = 5
-
-        def countdown():
-            nonlocal remaining_sec
+        def countdown(remaining_sec):
             aw_back_btn.config(text=f"Go back ({remaining_sec})")
-            remaining_sec -= 1
-            if remaining_sec > -1:
-                answer_window.after(1000,
-                                    countdown)  # I can't fully understand what happens when "answer_window" get closed while "after" method is being executed.
+            if remaining_sec > 0:
+                answer_window.after(1000, lambda: (countdown(remaining_sec-1)))  # I can't fully understand what happens when "answer_window" get closed while "after" method is being executed.
             else:
                 answer_window.destroy()
-
-        countdown()
+        countdown(remaining_sec=5)
 
     # Start a new game
     def new_game(self):
-        # delete all widgets in the main and list pages.
-        def del_widgets(page):
-            for widget in page.winfo_children():
-                widget.destroy()
-
-        del_widgets(self.pages["main"])
-        del_widgets(self.pages["list"])
+        # delete all the widgets in the main and list pages.
+        for del_pg_name in ("main", "list"):
+            self.del_widgets(self.pages[del_pg_name])
 
         # Come back to the setting page.
         self.show_page(self.pages["setting"])
